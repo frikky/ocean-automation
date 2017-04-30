@@ -8,3 +8,6 @@ Mainly used to learn about cloud automation, ansible and docker as a hobby proje
 # Requirements
 * python-digitalocean
 * ansible
+
+# 
+![TriHard](https://pbs.twimg.com/media/CHGmZO_XIAA2cUI.png)
