@@ -1,0 +1,5 @@
+- name: snort
+  docker_container:
+    name: snort-test 
+    image: frapsoft/snort
+    state: present
