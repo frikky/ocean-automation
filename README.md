@@ -9,5 +9,8 @@ Mainly used to learn about cloud automation, ansible and docker as a hobby proje
 * python-digitalocean
 * ansible
 
+# Fuck Vagrant
+:)
+
 # 
 ![TriHard](https://pbs.twimg.com/media/CHGmZO_XIAA2cUI.png)
