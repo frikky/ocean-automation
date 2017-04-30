@@ -26,7 +26,10 @@ class digisetup(object):
 
 	# Deletes an SSH config file
 	def remove_ansible(self, name):
-		os.remove("ansible/ssh/%s" % name)
+		try:
+			os.remove("ansible/ssh/%s" % name)
+		except OSError:
+			return
 
 	# Creates a temporary ansible file used for SSH configuration
 	def add_ansible(self, name, ip):
