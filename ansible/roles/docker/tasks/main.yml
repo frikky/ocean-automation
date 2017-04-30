@@ -1,0 +1,28 @@
+---
+- name: Install docker dependencies
+  apt: 
+    name: "{{ item }}"
+    state: present
+    update_cache: yes
+  with_items:
+    - apt-transport-https
+    - ca-certificates
+    - curl
+    - software-properties-common
+
+- name: Add docker repo key
+  apt_key:
+    id: "{{ apt_key_sig }}"
+    url: "{{ apt_key_url }}"
+    state: present
+
+- name: Add docker repo
+  apt_repository:
+    repo: "{{ apt_repository }}"
+    state: present
+
+- name: Install docker
+  apt:
+    name: "docker-engine=1.12.6-0~debian-jessie"
+    state: present
+    update_cache: yes

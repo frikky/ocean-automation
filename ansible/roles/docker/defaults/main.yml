@@ -1,0 +1,4 @@
+---
+apt_key_url: https://apt.dockerproject.org/gpg 
+apt_key_sig: 2C52609D
+apt_repository: deb https://apt.dockerproject.org/repo/ debian-{{ ansible_distribution_release }} main

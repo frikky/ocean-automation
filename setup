@@ -1,0 +1,168 @@
+#!/usr/local/bin/python
+
+import digitalocean
+import os
+import time
+import subprocess
+import sys
+import json
+
+class digisetup(object):
+	def __init__(self): 
+		try:
+			with open("config.json", "r") as tmp:
+				self.token = json.loads(tmp.read())[0]["token"]
+		except IOError:
+			print "Missing config.json file. e.g. [{\"token\":\"TOKENHERE\"}]"
+			exit()
+
+		self.manager = digitalocean.Manager(token=self.token)
+		self.ansible_ssh = "ansible/ansible_ssh"
+
+	# Runs ansible
+	def run_ansible(self, name):
+		subprocess.call(["ansible-playbook", "-i", "ansible/%s" % name, "ansible/ansible_setup.yml"])
+
+	# Deletes an SSH config file
+	def remove_ansible(self, name):
+		os.remove("ansible/%s" % name)
+
+	# 
+	def add_ansible(self, name, ip):
+		lul = [name, "ansible_ssh_host=%s" % ip, "ansible_ssh_port=22", "ansible_ssh_user='root'", \
+			"ansible_ssh_private_key_file='~/.ssh/id_rsa'", "ansible_ssh_common_args='-o StrictHostKeyChecking=no'"]
+
+		home = "%s/git/digitalocean/ansible/%s" % (os.getenv("HOME"), name)
+		with open("%s" % home, "w+") as dritt:
+			dritt.write(" ".join(lul))
+
+	def shutdown_all_droplets(self, cur_id=0):
+		self.droplets = self.manager.get_all_droplets()
+		self.droplet_check()
+		if len(sys.argv) > 2:
+			if sys.argv[2].lower() == "y" or sys.argv[2].lower() == "-y":
+				for droplet in self.droplets:
+					try:
+						droplet.destroy()
+						self.add_ssh_to_list(self.get_droplet(droplet.id), delete=True)
+					except digitalocean.baseapi.DataReadError as e:
+						print "%s" % e
+
+			print "Deleted all droplets."
+			return
+			
+		for droplet in self.droplets:
+			if raw_input("Destroy %s? yes/N: " % droplet.name).lower() == "yes":
+				print "Destroying \"%s\"" % droplet.name
+				droplet.destroy()
+
+	def droplet_check(self):
+		try:
+			if len(self.droplets) <= 0:
+				print "No available droplets."
+				exit()
+		except AttributeError:
+			pass
+
+
+	def get_droplet(self, cur_id=""):
+		self.droplet_check()
+
+		if not cur_id:
+			self.droplets = self.manager.get_all_droplets()
+			for item in self.droplets:
+				print "\n\n| %s \n %s \n %s \n %s \n %s" % (item.name, item.image, item.id, item.networks, item.status)
+			return
+
+		droplet = digitalocean.Droplet.get_object(self.token, cur_id)
+		return droplet
+
+	def is_droplet_up(self, cur_id, droplet=""):
+		if not droplet:
+			droplet = self.get_droplet(cur_id=cur_id)
+
+		return droplet.status
+
+	def get_registered_keys(self):
+		test = self.manager.get_all_sshkeys()
+		for item in test:
+			print item.name
+			print item.id
+		print len(test)
+		#digitalocean.SSHKey.load(token=self.token)
+
+	def create_droplet(self):
+		name = ""
+		if len(sys.argv) > 2:
+			name = sys.argv[2] 
+
+		if not name:
+			print "Missing name as argument two."
+			exit()
+
+		droplet = digitalocean.Droplet(	token=self.token,	
+										name='%s' % name,
+										region='ams2', 
+										image='debian-8-x64',
+										size_slug='512mb', 
+										backups=False,
+										ssh_keys=[8616152])
+		digisetup = droplet.create()
+		new_droplet = ""
+
+		while(1):
+			try:
+				new_droplet = self.get_droplet(droplet.id)
+				ip = new_droplet.networks["v4"][0]["ip_address"]
+				break
+			except IndexError:
+				continue
+
+		self.add_ssh_to_list(ip, name)
+		self.add_ansible(name, ip)
+		print "Created %s." % name
+
+		response = ""
+		while(response != "active"):
+			response = self.is_droplet_up(new_droplet.id)
+			print "Waiting for response \"active\": %s" % response
+			time.sleep(30)
+
+		self.run_ansible(name)
+		self.remove_ansible(name)
+
+	# Add SSH key to .ssh/config etc.
+	
+	def add_ssh_to_list(self, ip, name="", delete=False):
+		home = "%s/.ssh/config" % os.getenv("HOME") 
+		if not os.path.isfile(home):
+			print "No file in %s/.ssh/config"
+			exit()
+
+		if not delete and not name:
+			print "No name suggested."
+			exit()
+
+
+		if not delete:
+			with open(home, "a") as tmp:
+				tmp.write("Host %s\nUser root\nHostName %s\nIdentityFile ~/.ssh/id_rsa\nStrictHostKeyChecking no\n\n" % (name, ip)) 
+			print "Added %s to %s" % (name, home) 
+			return
+
+if __name__ == "__main__":
+	digisetup = digisetup()
+	#print digisetup.is_droplet_up(47385761)
+	
+	if len(sys.argv) < 2:
+		print "Usage: ./setup.py create/list/delete"
+		exit()
+	#digisetup.shutdown_all_droplets()
+	if sys.argv[1] == "create":
+		digisetup.create_droplet()
+	elif sys.argv[1] == "list":
+		digisetup.get_droplet()
+	elif sys.argv[1] == "delete" or sys.argv[1] == "destroy":
+		digisetup.shutdown_all_droplets()
+	else:
+		print "No argument \"%s\"." % sys.argv[1]
