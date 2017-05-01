@@ -1,0 +1,23 @@
+---
+- name:
+  apt: 
+    name: "{{ item }}"
+  with_items:
+    - git
+
+- name: Copy over files 
+  copy: 
+    src: /home/frikky/git/ocean-automation/honeypots/
+    dest: /root/
+
+- name: Clone Honeyd repo
+  git:
+    repo: https://github.com/DataSoft/Honeyd
+    dest: /root/Honeyd
+
+# Missing: Running docker
+# Logging to remote server
+#
+#- name: Build docker repo
+#  shell:
+#    docker build -t testname .

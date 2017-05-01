@@ -95,7 +95,6 @@ class digisetup(object):
             # Means one in progress
             pass
 
-
     def get_droplet(self, cur_id=""):
         self.droplet_check()
 
