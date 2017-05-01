@@ -11,9 +11,11 @@ class digisetup(object):
     def __init__(self): 
         try:
             with open("config.json", "r") as tmp:
-                self.token = json.loads(tmp.read())[0]["token"]
+                curjson = json.loads(tmp.read())
+                self.token = curjson[0]["token"]
+                self.ssh_keys = curjson[0]["sshkeys"]
         except IOError:
-            print "Missing config.json file. e.g. [{\"token\":\"TOKENHERE\"}]"
+            print "Missing config.json file. e.g. [{\"token\":\"TOKENHERE\",\"sshkeys\":[123,123]}]"
             exit()
 
         self.manager = digitalocean.Manager(token=self.token)
@@ -127,14 +129,13 @@ class digisetup(object):
         print len(test)
         #digitalocean.SSHKey.load(token=self.token)
 
-    def create_droplet(self):
-        name = ""
+    def create_droplet(self, name=""):
         if len(sys.argv) > 2:
             name = sys.argv[2] 
 
         if not name:
             print "Missing name as argument two."
-            exit()
+            return
 
         droplet = digitalocean.Droplet( token=self.token,	
                                         name='%s' % name,
@@ -142,7 +143,7 @@ class digisetup(object):
                                         image='debian-8-x64',
                                         size_slug='512mb', 
                                         backups=False,
-                                        ssh_keys=[8616152, 8635499])
+                                        ssh_keys=self.ssh_keys)
         digisetup = droplet.create()
         new_droplet = ""
 
@@ -160,6 +161,8 @@ class digisetup(object):
 
         response = ""
         while(response != "active"):
+            if not "honey" in name:
+                return 
             print "Waiting for response \"active\": %s" % response
             response = self.is_droplet_up(new_droplet.id)
             time.sleep(30)
