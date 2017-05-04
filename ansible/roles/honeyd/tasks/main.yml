@@ -1,9 +1,21 @@
 ---
-- name:
+- name: Install honeyd items
   apt: 
     name: "{{ item }}"
   with_items:
     - git
+    - libevent-dev 
+    - libdumbnet-dev
+    - libpcap-dev
+    - libpcre3-dev
+    - libedit-dev
+    - bison
+    - flex
+    - libtool
+    - automake
+    - git
+    - zlib1g-dev
+    - make
 
 - name: Copy over files 
   copy: 
@@ -15,9 +27,20 @@
     repo: https://github.com/DataSoft/Honeyd
     dest: /root/Honeyd
 
-# Missing: Running docker
-# Logging to remote server
-#
-#- name: Build docker repo
-#  shell:
-#    docker build -t testname .
+- name: Install honeypot
+  command: chdir=/root/Honeyd/ "{{ item }}"
+  with_items:
+    - ./autogen.sh
+    - ./configure
+    - make
+    #- make install
+
+- name: Set logging permissions 
+  command: "{{ item }}"
+  with_items:
+    - mkdir -m 777 /var/log/honeypot
+    - touch /var/log/honeypot/log
+    - chmod 777 /var/log/honeypot/log
+
+#- name: Run honeypot
+  #command: honeyd -f honeypot.conf -l /var/log/honeypot/test
