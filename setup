@@ -18,6 +18,7 @@ class digisetup(object):
             exit()
 
         self.manager = digitalocean.Manager(token=self.token)
+        self.ssh_keys = self.manager.get_all_sshkeys()
         self.home = os.path.dirname(os.path.realpath(__file__))
         self.ansible_ssh = "ansible/ansible_ssh"
 
@@ -146,7 +147,7 @@ class digisetup(object):
                                         image='debian-8-x64',
                                         size_slug='512mb', 
                                         backups=False,
-                                        ssh_keys=keys)
+                                        ssh_keys=self.ssh_keys)
         digisetup = droplet.create()
         new_droplet = ""
 
@@ -160,7 +161,7 @@ class digisetup(object):
 
         print "Creating ssh token for ansible."
         self.add_ssh_to_list(ip, name)
-        print "Adding ansible config."
+        print "Adding ansible config. IP: %s" % ip
         self.add_ansible(name, ip)
         print "Created %s." % name
 
