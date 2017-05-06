@@ -1,0 +1,16 @@
+---
+- name: copy eula to server
+  copy:
+    src: /home/frikky/git/ocean-automation/runable/minecraft/eula.txt
+    dest: /root/eula.txt
+
+- name: copy dockerfile
+  copy: 
+    src: /home/frikky/git/ocean-automation/runable/minecraft/Dockerfile
+    dest: /root/Dockerfile
+
+- name: Build dockerfile for minecraft 
+  command: docker build -t olgen /root 
+
+- name: Run docker
+  command: docker run -p "25565:25565" --detach olgen

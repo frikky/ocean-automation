@@ -9,7 +9,7 @@
     - ca-certificates
     - curl
     - software-properties-common
-    - python-pip
+    - default-jre 
 
 - name: Add docker repo key
   apt_key:
@@ -27,8 +27,3 @@
     name: "docker-engine=1.12.6-0~debian-jessie"
     state: present
     update_cache: yes
-
-- name: Install pip-moduels
-  pip:
-    name: "docker-py"
-    state: present

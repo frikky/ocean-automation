@@ -25,8 +25,12 @@ class digisetup(object):
     # Runs ansible
     def run_ansible(self, name):
         print "Starting ansible setup based on ansible_setup.yml"
-        subprocess.call(["ansible-playbook", "-i", "ansible/ssh/%s" % name\
-            , "ansible/ansible_setup.yml"])
+        if "honey" in name:
+            subprocess.call(["ansible-playbook", "-i", "ansible/ssh/%s" % name\
+                , "ansible/honeypot.yml"])
+        elif "minecraft" in name:
+            subprocess.call(["ansible-playbook", "-i", "ansible/ssh/%s" % name\
+                , "ansible/minecraft.yml"])
 
     # Deletes an SSH config file
     def remove_ansible(self, name):
@@ -155,17 +159,17 @@ class digisetup(object):
             except IndexError:
                 continue
 
+        print "Creating ssh token for ansible."
         self.add_ssh_to_list(ip, name)
+        print "Adding ansible config."
         self.add_ansible(name, ip)
         print "Created %s." % name
 
         response = ""
         while(response != "active"):
-            if not "honey" in name:
-                return 
-            print "Waiting for response \"active\": %s" % response
+            print "Waiting 10 sec for response \"active\". Current: %s" % response
             response = self.is_droplet_up(new_droplet.id)
-            time.sleep(30)
+            time.sleep(10)
 
         self.run_ansible(name)
         #self.remove_ansible(name)
