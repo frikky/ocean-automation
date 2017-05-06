@@ -14,3 +14,11 @@
 
 - name: Run docker
   command: docker run -p "25565:25565" --detach olgen
+
+# Mods:
+# download from http://files.minecraftforge.net/maven/net/minecraftforge/forge/index_1.10.2.html
+# extract files to a .minecraft dir
+# enter .minecraft dir
+# run minecraft server with eula.txt
+# Download pixelmon from http://pixelmonmod.com/downloads.php
+# Download spongeforge from 
