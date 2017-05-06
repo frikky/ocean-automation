@@ -13,7 +13,6 @@ class digisetup(object):
             with open("config.json", "r") as tmp:
                 curjson = json.loads(tmp.read())
                 self.token = curjson[0]["token"]
-                self.ssh_keys = curjson[0]["sshkeys"]
         except IOError:
             print "Missing config.json file. e.g. [{\"token\":\"TOKENHERE\",\"sshkeys\":[123,123]}]"
             exit()
@@ -147,7 +146,7 @@ class digisetup(object):
                                         image='debian-8-x64',
                                         size_slug='512mb', 
                                         backups=False,
-                                        ssh_keys=self.ssh_keys)
+                                        ssh_keys=keys)
         digisetup = droplet.create()
         new_droplet = ""
 
