@@ -1,0 +1,5 @@
+setup docker + ansible
+required download: tcpdump, screen
+
+logging to external server
+create user that's not root

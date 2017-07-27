@@ -46,8 +46,14 @@ class digisetup(object):
             "ansible_ssh_common_args='-o StrictHostKeyChecking=no'"]
 
         home = "%s/ansible/ssh/%s" % (self.home, name)
-        with open("%s" % home, "w+") as dritt:
-            dritt.write(" ".join(lul))
+        try:
+            with open("%s" % home, "w+") as dritt:
+                dritt.write(" ".join(lul))
+        except IOError:
+            os.mkdir("ansible/ssh") 
+            with open("%s" % home, "w+") as dritt:
+                dritt.write(" ".join(lul))
+            
 
     def shutdown_all_droplets(self): 
         self.droplets = self.manager.get_all_droplets()
