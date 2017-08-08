@@ -1,0 +1,59 @@
+# https://www.digitalocean.com/community/tutorials/how-to-set-up-an-openvpn-server-on-ubuntu-16-04
+
+sudo apt update
+sudo apt install openvpn easy-rsa ufw
+
+make-cadir ~/openvpn-ca
+
+# Build Server CA
+
+# EDIT ~/openvpn-ca/vars
+# Will add template file
+# KEY_COUNTRY -> KEY_NAME
+
+source ~/openvpn-ca/vars
+cd ~/openvpn-ca
+# Cleanup just in case
+./clean-all
+./build-all #(mash enter?)
+
+# ./build-dh somewhere
+./build-key-server server #server is the KEY_NAME in ~/openvpn-ca/vars
+
+# Build DH key
+./build-dh
+
+# generate HMAC signature
+openvpn --genkey --secret keys/ta.key
+
+# Build Client Certificate 
+source ~/openvpn-ca/vars
+cd ~/openvpn-ca
+
+# password
+build-key-pass client1 
+# Non password
+#./build-key client1 
+
+# Copy keys to /etc/openvpn
+cd ~/openvpn-ca/keys
+sudo cp ca.crt ca.key server.crt server.key ta.key dh2048.pem /etc/openvpn
+
+# Copy sample configuration file to /etc/openvpn
+gunzip -c /usr/share/doc/openvpn/examples/sample-config-files/server.conf.gz | tee /etc/openvpn/server.conf
+
+## EDIT /etc/openvpn/server.conf
+# config a lot of shit.
+# Will add a template file here when it works
+
+## 
+ufw allow 1194/udp
+ufw allow OpenSSH 
+
+### UFW
+#ERROR: problem running ufw-init
+#Bad argument `*nat'
+#Error occurred at line: 21
+#Try `iptables-restore -h' or 'iptables-restore --help' for more information.
+#
+#iptables-restore v1.4.21: Can't set policy `ACCEPT' on `POSTROUTING' line 22: Bad built-in chain name
