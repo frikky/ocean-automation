@@ -147,13 +147,17 @@ class digisetup(object):
             print "Missing name as argument two."
             return
 
-        droplet = digitalocean.Droplet( token=self.token,	
-                                        name='%s' % name,
-                                        region='ams2', 
-                                        image='debian-8-x64',
-                                        size_slug='512mb', 
-                                        backups=False,
-                                        ssh_keys=self.ssh_keys)
+        # Hardcoded droplet :(
+        droplet = digitalocean.Droplet( 
+            token=self.token,	
+            name='%s' % name,
+            region='ams2', 
+            image="ubuntu-16-04-x64",
+            size_slug='512mb', 
+            backups=False,
+            ssh_keys=self.ssh_keys
+        )
+        #image='debian-8-x64',
         digisetup = droplet.create()
         new_droplet = ""
 
