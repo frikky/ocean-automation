@@ -134,9 +134,9 @@ class digisetup(object):
     def get_registered_keys(self):
         test = self.manager.get_all_sshkeys()
         for item in test:
-            print item.name
-            print item.id
-        print len(test)
+            print item.name, item.id
+
+        print "%d total keys. " % len(test)
         #digitalocean.SSHKey.load(token=self.token)
 
     def create_droplet(self, name=""):
